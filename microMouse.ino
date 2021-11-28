@@ -8,7 +8,14 @@ author: AmirRahmani
 #define A2 5
 #define B1 10 // Motor B pins
 #define B2 11
-
+int trigPin1=3;
+int echoPin1=2;
+int trigPin2=7;
+int echoPin2=8;
+int trigPin3=12;
+int echoPin3=13;
+long duration;
+int distance;
 int incomingByte = 0; // for incoming serial data
 
 void setup() {
@@ -36,9 +43,9 @@ void setup() {
 }
 
 void loop() {
- forward();
+  forward();
   delay(200);
-  Serial.println(getDistanceFromSensor());
+  Serial.println(getDistanceFromSensor(trigPin1,echoPin1));
 }
 void forward() {          //function of forward 
   analogWrite(A1, 255);
@@ -61,3 +68,15 @@ void Stop() {              //function of stop
   digitalWrite(B2, LOW);
 }
 
+int getDistanceFromSensor(int trigPin,int echoPin){
+  digitalWrite(trigPin,LOW);
+  delayMicroseconds(2);
+  digitalWrite(echoPin,LOW);
+  digitalWrite(trigPin,HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin,LOW);
+  duration=pulseIn(echoPin,HIGH);
+  //TODO how to get speed in L9110S
+  //distance=duration*speed/2;
+  return duration;
+}
