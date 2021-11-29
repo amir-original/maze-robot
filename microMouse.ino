@@ -34,12 +34,6 @@ void setup() {
   digitalWrite(B2, LOW);
   
   Serial.begin(9600); // opens serial port, sets data rate to 9600 bps
-
-  Serial.println("select direction of movement");
-  Serial.println("1.forward");
-  Serial.println("2.backward");
-  Serial.println("3.stop");
-
 }
 
 void loop() {
@@ -47,27 +41,38 @@ void loop() {
   delay(200);
   Serial.println(getDistanceFromSensor(trigPin1,echoPin1));
 }
-void forward() {          //function of forward 
+
+/**
+*function of forward 
+*/
+void forward() {          
   analogWrite(A1, 255);
   analogWrite(A2, 0);
   analogWrite(B1, 255);
   analogWrite(B2, 0);
 }
-
-void backward() {         //function of backward
+/**
+*function of backward
+*/
+void backward() {         
   analogWrite(A1, 0);
   analogWrite(A2, 210);
   analogWrite(B1, 0);
   analogWrite(B2, 210);
 }
-
-void Stop() {              //function of stop
+/**
+*function of stop
+*/
+void Stop() {              
   digitalWrite(A1, LOW);
   digitalWrite(A2, LOW);
   digitalWrite(B1, LOW);
   digitalWrite(B2, LOW);
 }
 
+/**
+ * get distance (cm) by ultarsonic sensor
+ */
 int getDistanceFromSensor(int trigPin,int echoPin){
   digitalWrite(trigPin,LOW);
   delayMicroseconds(2);
@@ -76,7 +81,6 @@ int getDistanceFromSensor(int trigPin,int echoPin){
   delayMicroseconds(10);
   digitalWrite(trigPin,LOW);
   duration=pulseIn(echoPin,HIGH);
-  //TODO how to get speed in L9110S
-  //distance=duration*speed/2;
-  return duration;
+  distance=duration*0.034/2;
+  return distance;
 }
