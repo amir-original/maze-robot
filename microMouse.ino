@@ -19,10 +19,15 @@ int distance;
 int incomingByte = 0; // for incoming serial data
 
 void setup() {
-
-  pinMode(trigPin,OUTPUT);
-  pinMode(echoPin,INPUT);
   Serial.begin(9600);
+  
+  pinMode(trigPin1,OUTPUT);
+  pinMode(echoPin1,INPUT);
+  pinMode(trigPin2,OUTPUT);
+  pinMode(echoPin2,INPUT);
+  pinMode(trigPin3,OUTPUT);
+  pinMode(echoPin3,INPUT);
+  
   pinMode(A1, OUTPUT);
   pinMode(A2, OUTPUT);
   pinMode(B1, OUTPUT);
