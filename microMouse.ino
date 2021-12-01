@@ -74,9 +74,9 @@ void Stop() {
 }
 
 /**
- * get distance (cm) by ultarsonic sensor
+ * get distance (cm) by ultarsonic sensor To Bar
  */
-int getDistanceFromSensor(int trigPin,int echoPin){
+int getDistanceToBar(int trigPin,int echoPin){
   digitalWrite(trigPin,LOW);
   delayMicroseconds(2);
   digitalWrite(echoPin,LOW);
