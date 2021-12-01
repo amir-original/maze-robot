@@ -87,3 +87,24 @@ int getDistanceToBar(int trigPin,int echoPin){
   distance=duration*0.034/2;
   return distance;
 }
+
+bool isLeftClosed(){
+  if(getDistanceToBar(trigPinLeft,echoPinLeft) <40){
+    return true;
+  }
+  return false;
+}
+
+bool isRightClosed(){
+  if(getDistanceToBar(trigPinRight,echoPinRight) <40){
+    return true;
+  }
+  return false;
+}
+
+bool isFrontClosed(){
+  if(getDistanceToBar(trigPinFront,echoPinFront) <40){
+    return true;
+  }
+  return false;
+}
