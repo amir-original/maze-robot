@@ -74,6 +74,26 @@ void Stop() {
 }
 
 /**
+*function of turn left
+*/
+void turnLeft() {         
+  analogWrite(A1, 0);
+  analogWrite(A2, 0);
+  analogWrite(B1, 70);
+  analogWrite(B2, 0);
+}
+
+/**
+*function of turn right
+*/
+void turnRight() {         
+  analogWrite(A1, 70);
+  analogWrite(A2, 0);
+  analogWrite(B1, 0);
+  analogWrite(B2, 0);
+}
+
+/**
  * get distance (cm) by ultarsonic sensor To Bar
  */
 int getDistanceToBar(int trigPin,int echoPin){
