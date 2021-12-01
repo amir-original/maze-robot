@@ -8,25 +8,25 @@ author: AmirRahmani
 #define A2 5
 #define B1 10 // Motor B pins
 #define B2 11
-int trigPin1=3;
-int echoPin1=2;
-int trigPin2=7;
-int echoPin2=8;
-int trigPin3=12;
-int echoPin3=13;
+int trigPinLeft=3;
+int echoPinLeft=2;
+int trigPinRight=8;
+int echoPinRight=7;
+int trigPinFront=12;
+int echoPinFront=13;
 long duration;
 int distance;
 int incomingByte = 0; // for incoming serial data
 
 void setup() {
-  Serial.begin(9600);
-  
-  pinMode(trigPin1,OUTPUT);
-  pinMode(echoPin1,INPUT);
-  pinMode(trigPin2,OUTPUT);
-  pinMode(echoPin2,INPUT);
-  pinMode(trigPin3,OUTPUT);
-  pinMode(echoPin3,INPUT);
+  Serial.begin(9600); // opens serial port, sets data rate to 9600 bps
+
+  pinMode(trigPinFront,OUTPUT);
+  pinMode(echoPinFront,INPUT);
+  pinMode(trigPinRight,OUTPUT);
+  pinMode(echoPinRight,INPUT);
+  pinMode(trigPinLeft,OUTPUT);
+  pinMode(echoPinLeft,INPUT);
   
   pinMode(A1, OUTPUT);
   pinMode(A2, OUTPUT);
@@ -38,13 +38,11 @@ void setup() {
   digitalWrite(B1, LOW);
   digitalWrite(B2, LOW);
   
-  Serial.begin(9600); // opens serial port, sets data rate to 9600 bps
 }
 
 void loop() {
   forward();
   delay(200);
-  Serial.println(getDistanceFromSensor(trigPin1,echoPin1));
 }
 
 /**
