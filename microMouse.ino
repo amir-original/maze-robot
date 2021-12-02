@@ -41,8 +41,39 @@ void setup() {
 }
 
 void loop() {
-  forward();
-  delay(200);
+   delay(300);
+  if(!isFrontClosed() && isRightClosed() && isLeftClosed()){
+    Serial.println("move forward...");
+     backward();
+  }
+  if(isLeftClosed() && isFrontClosed() && !isRightClosed()){
+    Serial.println("turn right...");
+    turnRight();
+  }
+  if(!isLeftClosed() && isFrontClosed() && isRightClosed()){
+    Serial.println("turn left...");
+   turnLeft();
+  }
+  if (isLeftClosed()&& isRightClosed() && isFrontClosed()){
+    Serial.println("End Of Maze.");
+    Stop();
+  }
+
+  if (!(isFrontClosed() && isRightClosed() && isLeftClosed()))
+    {
+     forward();
+     delay(200);
+     Stop();
+
+     if (!(isFrontClosed() && isRightClosed() && isLeftClosed()))
+        {
+          Serial.println("End Of Maze.");
+          Stop();
+        }else{
+         Serial.println("FOUR WAY INTERSECTION");
+         turnLeft();
+        }
+    }
 }
 
 /**
