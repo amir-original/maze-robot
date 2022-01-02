@@ -29,6 +29,11 @@ int path[36],two_way[36]={0,0,0,0,0,0,
 bool isFindCorrectPath=false;
 char curr_dir='Y';
 /**
+ * All modes that the robot must choose between that
+ * state : null,A:RL,B:FR,C:LF
+ */
+char mode='\0';
+/**
  * 'F': forward
  * 'R': turn Right
  * 'L': turn left
@@ -86,24 +91,26 @@ void loop() {
   //left and right open
   if(!isLeftWall() && !isRightWall() && isFrontWall()){
     int rand_=random(1,3);
+    mode='A';//LR
     //choose random way between left and right
       if(rand_==1){
         turnRight();
         path[++role]=2;
-        curr_dir='F';
+        curr_dir='R';
         Serial.println("right 1");
       }
       if(rand_==2){
         turnLeft();
         path[++role]=3;
-        curr_dir='F';
+        curr_dir='L';
          Serial.println("left..");
       }
        two_way[role]=1;
   }
   //left and front open
   if(!isLeftWall() && isRightWall() && !isFrontWall()){
-    int rand_=random(1,3);
+   int rand_=random(1,3);
+   mode='C';//LF
     //choose random way between left and front
     if(rand_==1){
         forward();
@@ -121,7 +128,8 @@ void loop() {
   }
   //right and front open
   if(isLeftWall() && !isRightWall() && !isFrontWall()){
-    int rand_=random(1,3);
+   int rand_=random(1,3);
+       mode='B';
     //choose random way between right and front
     if(rand_==1){
         forward();
@@ -178,17 +186,35 @@ void turn_back(){
     }else if(path[role]==3){
       turnRight();
     }
-
-    if(curr_dir=='F'){
+    //left and right open
+    if(mode=='A' && curr_dir=='L'){
       forward();
       delay(1000);
       Stop();
-       path[role]=2;
-    }else if(curr_dir=='R'){
+      path[role]=2;
+    }
+    if(mode=='A' && curr_dir=='R'){
+      forward();
+      delay(1000);
+      Stop();
+      path[role]=3;
+    }
+    //left and front open
+    if(mode=='C' && curr_dir=='F'){
       turnRight();
-      path[role]=1;
-    }else if(curr_dir=='L'){
+      path[role]=3;
+    }
+    if(mode=='C' && curr_dir=='L'){
       turnLeft();
+      path[role]=1;
+    }
+    //right and front open
+    if(mode=='B' && curr_dir=='F'){
+      turnLeft();
+      path[role]=2;
+    }
+    if(mode=='B' && curr_dir=='R'){
+      turnRight();
       path[role]=1;
     }
   }
