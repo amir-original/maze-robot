@@ -9,7 +9,7 @@ author: AmirRahmani
 #define MB1 10 // Motor B pins
 #define MB2 11
 
-#define PWM 200
+#define PWM 110
 #define DST 20
 
 /**
@@ -143,8 +143,8 @@ void loop() {
 *move forward function
 */
 void  forward() {         
-  analogWrite(MA1, PWM);
-  analogWrite(MA2, LOW);
+  analogWrite(MA1, LOW);
+  analogWrite(MA2, PWM);
   analogWrite(MB1, LOW);
   analogWrite(MB2, PWM);
 }
@@ -174,8 +174,8 @@ void Stop() {
 */
 
 void turnLeft() {         
-  analogWrite(MA1, LOW);
-  analogWrite(MA2, PWM);
+  analogWrite(MA1, PWM);
+  analogWrite(MA2, LOW);
   analogWrite(MB1, LOW);
   analogWrite(MB2, PWM);
 }
@@ -184,8 +184,8 @@ void turnLeft() {
 *function of turn right
 */
 void turnRight() {        
-  analogWrite(MA1,PWM);
-  analogWrite(MA2, LOW);
+  analogWrite(MA1, LOW);
+  analogWrite(MA2, PWM);
   analogWrite(MB1, PWM);
   analogWrite(MB2, LOW);
 }
@@ -227,6 +227,7 @@ int frontSensor(){
   long duration=getDuration(trigPinFront,echoPinFront);
   return (duration/15);
 }
+
 bool isLeftClosed(){
   if(leftSensor()<DST){
      return true;
