@@ -1,4 +1,10 @@
-#include "TimerOne.h"
+/*Initilize WIFI Madule*/
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+#include <printf.h>
+
+RF24 radio(9, 8); // (CE, CSN) for ARD Nano
 #define MA1 5  // Motor A pins
 #define MA2 6
 #define MB1 10 // Motor B pins
@@ -20,18 +26,19 @@ int echoPinFront=A2;
 long duration;
 int  distance;
 int incomingByte = 0; // for incoming serial data
-int role=-1;
-int path[36],two_way[36]={0,0,0,0,0,0,
-              0,0,0,0,0,0,
-              0,0,0,0,0,0,
-              0,0,0,0,0,0,
-              0,0,0,0,0,0,
-              0,0,0,0,0,0};             
+int role=-1;  
 bool isFindCorrectPath=false;
 bool deadend=false;
+uint32_t path[36],two_way[36]={0,0,0,0,0,0,
+                               0,0,0,0,0,0,
+                               0,0,0,0,0,0,
+                               0,0,0,0,0,0,
+                               0,0,0,0,0,0,
+                               0,0,0,0,0,0};           
 /**
  * All modes that the robot must choose between that
- * state : null,A:RL,B:FR,C:LF
+ * mode : null,A:RL(Right and Left open),B:FR(Front and Right open),C:LF(Front and Left open)
+ * curr_dir: `F`:Forward,`R`:turn Right,`L`:turn Left
  */
 char mode[36],curr_dir[36]={'\0','\0','\0','\0','\0','\0',
                             '\0','\0','\0','\0','\0','\0',
@@ -39,12 +46,9 @@ char mode[36],curr_dir[36]={'\0','\0','\0','\0','\0','\0',
                             '\0','\0','\0','\0','\0','\0',
                             '\0','\0','\0','\0','\0','\0',
                             '\0','\0','\0','\0','\0','\0'};
-/**
- * 'F': forward
- * 'R': turn Right
- * 'L': turn left
- * 'B'  return
- */
+
+const byte address[6] = {'R','x','A','A','A'};
+uint32_t correct_path[36];
 void setup() {
   Serial.begin(9600); // opens serial port, sets data rate to 9600 bps
   pinMode(trigPinFront,OUTPUT);
@@ -63,9 +67,14 @@ void setup() {
   analogWrite(MA2, LOW);
   analogWrite(MB1, LOW);
   analogWrite(MB2, LOW);
+
+  //setup wifi
+  radio.begin();
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_MAX);
+  radio.stopListening();
 }
 void loop() {
-  // put your main code here, to run repeatedly: 
   Serial.println("array path: ");
   for(int i=role;i>0;i--){
    Serial.print(path[i]);
@@ -74,6 +83,7 @@ void loop() {
   }
   Stop();
   delay(5000);
+
   //just front open
   if(isLeftWall() && isRightWall() && !isFrontWall()){
     forward();
@@ -89,18 +99,21 @@ void loop() {
       delay(100);
     }
   }
+
   //just right open
   if(isLeftWall() && !isRightWall() && isFrontWall()){
     path[++role]=2;
     turnRight();
     Serial.println("right");
   }
+
   //just left open 
   if(!isLeftWall() && isRightWall() && isFrontWall()){
     path[++role]=3;
     turnLeft();
      Serial.println("left");
   }
+
   //left and right open
   if(!isLeftWall() && !isRightWall() && isFrontWall()){
     int rand_=random(1,3);
@@ -122,6 +135,7 @@ void loop() {
        Stop();
        delay(70);
   }
+
   //left and front open
   if(!isLeftWall() && isRightWall() && !isFrontWall()){
    int rand_=random(1,3);
@@ -143,6 +157,7 @@ void loop() {
       Stop();
       delay(70);
   }
+
   //right and front open
   if(isLeftWall() && !isRightWall() && !isFrontWall()){
    int rand_=random(1,3);
@@ -164,6 +179,7 @@ void loop() {
       Stop();
       delay(70);
   }
+
   //Deadend left and right and front wall
   if(isDeadend()){
     Serial.println("Deadend");
@@ -174,17 +190,19 @@ void loop() {
     Stop();
     deadend=true;
   }
+
   //turn back if is deadend
   if(deadend){
     turn_back();
     delay(1000);
   }
+
   //right and left and front open all dir open
   if(isAllDirOpen()){
     Serial.println("all dir open");
     Serial.println("forward");
     forward();
-    delay(3000);
+    delay(4000);
     Stop();
     path[++role]=1;
     if(isAllDirOpen()){
@@ -193,8 +211,17 @@ void loop() {
       Serial.println("End maze..");
       isFindCorrectPath=true;
       //End maze and send path to another robot
+      copy(path,correct_path,36);
     }
   }
+
+/**
+ * after solve maze and find correct path send correct path to Fellow robot 
+ */
+  if(isFindCorrectPath){
+    send_correct_path_to_fellow_robot();
+  }
+
 }
 
 void turn_back(){
@@ -370,6 +397,19 @@ bool isDeadend(){
   }
 }
 
-void init_interrupt(){
-  Timer1.initialize();
+bool send_correct_path_to_fellow_robot(){
+  Serial.println("Sending...");
+  int result=radio.write(&correct_path, sizeof(correct_path));
+  if(!result){
+   Serial.println("oops!, send failed!!");
+   return false;
+  }
+   Serial.println("sended successed");
+   return true;
+  delay(200);
+}
+
+// Function to copy 'len' elements from 'src' to 'dst'
+void copy(uint32_t* src, uint32_t* dst, int len) {
+    memcpy(dst, src, sizeof(src[0])*len);
 }
