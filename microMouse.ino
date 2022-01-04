@@ -1,11 +1,12 @@
+#include "TimerOne.h"
 #define MA1 5  // Motor A pins
 #define MA2 6
 #define MB1 10 // Motor B pins
 #define MB2 11
 
-#define PWM_RIGHT 150
-#define PWM_LEFT 155
-#define DST 20
+#define PWM_RIGHT 200
+#define PWM_LEFT 120
+#define DST 11
 
 /**
 *initialize all ultrasonics
@@ -27,12 +28,17 @@ int path[36],two_way[36]={0,0,0,0,0,0,
               0,0,0,0,0,0,
               0,0,0,0,0,0};             
 bool isFindCorrectPath=false;
-char curr_dir='Y';
+bool deadend=false;
 /**
  * All modes that the robot must choose between that
  * state : null,A:RL,B:FR,C:LF
  */
-char mode='\0';
+char mode[36],curr_dir[36]={'\0','\0','\0','\0','\0','\0',
+                            '\0','\0','\0','\0','\0','\0',
+                            '\0','\0','\0','\0','\0','\0',
+                            '\0','\0','\0','\0','\0','\0',
+                            '\0','\0','\0','\0','\0','\0',
+                            '\0','\0','\0','\0','\0','\0'};
 /**
  * 'F': forward
  * 'R': turn Right
@@ -57,24 +63,31 @@ void setup() {
   analogWrite(MA2, LOW);
   analogWrite(MB1, LOW);
   analogWrite(MB2, LOW);
-
 }
 void loop() {
   // put your main code here, to run repeatedly: 
-  if(isFindCorrectPath){
-  //finsh end maze and stop run
-    Stop();
-    Serial.println("Stop Run so End Maze");
-    delay(8000);
-  }else if(!isFindCorrectPath){
-  forward;
-  Serial.println("forward");
-  delay(5000);
+  Serial.println("array path: ");
+  for(int i=role;i>0;i--){
+   Serial.print(path[i]);
+   Serial.println(" , ");
+   delay(1000);
+  }
   Stop();
-  delay(1000);
+  delay(5000);
   //just front open
   if(isLeftWall() && isRightWall() && !isFrontWall()){
+    forward();
     path[++role]=1;
+    Serial.println("forward first");
+    delay(2000);
+    Stop();
+    if(leftSensor() > rightSensor()){
+      turnLeft();
+      delay(300);
+    }else{
+      turnRight();
+      delay(100);
+    }
   }
   //just right open
   if(isLeftWall() && !isRightWall() && isFrontWall()){
@@ -91,59 +104,65 @@ void loop() {
   //left and right open
   if(!isLeftWall() && !isRightWall() && isFrontWall()){
     int rand_=random(1,3);
-    mode='A';//LR
     //choose random way between left and right
       if(rand_==1){
         turnRight();
         path[++role]=2;
-        curr_dir='R';
+        curr_dir[role]='R';
         Serial.println("right 1");
       }
       if(rand_==2){
         turnLeft();
         path[++role]=3;
-        curr_dir='L';
-         Serial.println("left..");
+        curr_dir[role]='L';
+        Serial.println("left..");
       }
        two_way[role]=1;
+       mode[role]='A';//LR
+       Stop();
+       delay(70);
   }
   //left and front open
   if(!isLeftWall() && isRightWall() && !isFrontWall()){
    int rand_=random(1,3);
-   mode='C';//LF
     //choose random way between left and front
     if(rand_==1){
         forward();
         path[++role]=1;
-        curr_dir='F';
+        curr_dir[role]='F';
          Serial.println("forward..");
       }
       if(rand_==2){
         turnLeft();
         path[++role]=3;
-        curr_dir='L';
+        curr_dir[role]='L';
          Serial.println("left..");
       }
       two_way[role]=1;
+      mode[role]='C';//LF
+      Stop();
+      delay(70);
   }
   //right and front open
   if(isLeftWall() && !isRightWall() && !isFrontWall()){
    int rand_=random(1,3);
-       mode='B';
     //choose random way between right and front
     if(rand_==1){
         forward();
         path[++role]=1;
-        curr_dir='F';
+        curr_dir[role]='F';
         Serial.println("forward..");
       }
       if(rand_==2){
         turnRight();
         path[++role]=2;
-        curr_dir='R';
+        curr_dir[role]='R';
         Serial.println("right 2");
       }
       two_way[role]=1;
+      mode[role]='B';
+      Stop();
+      delay(70);
   }
   //Deadend left and right and front wall
   if(isDeadend()){
@@ -151,73 +170,94 @@ void loop() {
     turnRight();
     //turn back 180deg
     delay(2000);
+    Serial.println("turn back 180deg");
     Stop();
-    //turn back
-    turn_back();
+    deadend=true;
   }
-
+  //turn back if is deadend
+  if(deadend){
+    turn_back();
+    delay(1000);
+  }
   //right and left and front open all dir open
   if(isAllDirOpen()){
     Serial.println("all dir open");
+    Serial.println("forward");
     forward();
-    delay(1000);
+    delay(3000);
     Stop();
     path[++role]=1;
     if(isAllDirOpen()){
       Stop();
-      isFindCorrectPath=true;
-      delay(1000);
+      delay(2000);
       Serial.println("End maze..");
+      isFindCorrectPath=true;
       //End maze and send path to another robot
     }
   }
- }
 }
 
 void turn_back(){
   for(;two_way[role]!=1;role--){
-    path[role]=0;
     if(path[role]==1){
       forward();
-      delay(1000);
+      Serial.println("turn back :forward");
+      delay(2000);
       Stop();
     }else if(path[role]==2){
       turnLeft();
+      Serial.println("turn back: left");
     }else if(path[role]==3){
       turnRight();
+      Serial.println("turn back: right");
     }
-    //left and right open
-    if(mode=='A' && curr_dir=='L'){
+    path[role]=0;
+    delay(5000);
+    Stop();
+}
+   //two way
+   if(two_way[role]==1){
+      if(mode[role]=='A' && curr_dir[role]=='L'){
       forward();
+      Serial.println("two turn back: forward");
       delay(1000);
       Stop();
       path[role]=2;
     }
-    if(mode=='A' && curr_dir=='R'){
+    if(mode[role]=='A' && curr_dir[role]=='R'){
       forward();
+      Serial.println("two turn back: forward");
       delay(1000);
       Stop();
       path[role]=3;
     }
     //left and front open
-    if(mode=='C' && curr_dir=='F'){
+    if(mode[role]=='C' && curr_dir[role]=='F'){
       turnRight();
       path[role]=3;
+      Serial.println("two turn back : right");
     }
-    if(mode=='C' && curr_dir=='L'){
+    if(mode[role]=='C' && curr_dir[role]=='L'){
       turnLeft();
+      Serial.println("turn back: left");
       path[role]=1;
     }
     //right and front open
-    if(mode=='B' && curr_dir=='F'){
+    if(mode[role]=='B' && curr_dir[role]=='F'){
       turnLeft();
+      Serial.println("two turn back: left");
       path[role]=2;
     }
-    if(mode=='B' && curr_dir=='R'){
+    if(mode[role]=='B' && curr_dir[role]=='R'){
       turnRight();
+      Serial.println("two turn back: right");
       path[role]=1;
     }
-  }
+   }
+   Stop();
+   delay(180);
+   deadend=false;
+   exit;
 }
 
 
@@ -280,7 +320,7 @@ int leftSensor(){
 }
 int frontSensor(){
   long duration=getDuration(trigPinFront,echoPinFront);
-  return (duration/20);
+  return (duration/40);
 }
 bool isLeftWall(){
   if(leftSensor()<DST){
@@ -298,7 +338,7 @@ bool isRightWall(){
 }
 
 bool isFrontWall(){
-  if(frontSensor() <DST){
+  if(frontSensor() < DST){
      return true;
   }
   return false;
@@ -314,16 +354,22 @@ bool isWall(){
   else
     return false;      
 }
+
 bool isAllDirOpen(){
-  if(!isDeadend())
+  if(!isLeftWall() && !isRightWall() && !isFrontWall())
     return true;
    else
     return false; 
 }
+
 bool isDeadend(){
-  if(isLeftWall() && isRightWall() && isFrontWall()){
+  if(isFrontWall() && isRightWall() && isLeftWall()){
     return true;
-  }else{
+  }else{          
     return false;
   }
+}
+
+void init_interrupt(){
+  Timer1.initialize();
 }
