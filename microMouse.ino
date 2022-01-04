@@ -1,4 +1,4 @@
-#include "TimerOne.h"
+
 #define MA1 5  // Motor A pins
 #define MA2 6
 #define MB1 10 // Motor B pins
@@ -26,12 +26,15 @@ int path[36],two_way[36]={0,0,0,0,0,0,
               0,0,0,0,0,0,
               0,0,0,0,0,0,
               0,0,0,0,0,0,
-              0,0,0,0,0,0};             
+              0,0,0,0,0,0};   
+
 bool isFindCorrectPath=false;
 bool deadend=false;
+
 /**
  * All modes that the robot must choose between that
- * state : null,A:RL,B:FR,C:LF
+ * mode : null,A:RL,B:FR,C:LF
+ * curr_dir: `F`: forward,`R`:turn right,`L`:turn Left
  */
 char mode[36],curr_dir[36]={'\0','\0','\0','\0','\0','\0',
                             '\0','\0','\0','\0','\0','\0',
@@ -39,12 +42,7 @@ char mode[36],curr_dir[36]={'\0','\0','\0','\0','\0','\0',
                             '\0','\0','\0','\0','\0','\0',
                             '\0','\0','\0','\0','\0','\0',
                             '\0','\0','\0','\0','\0','\0'};
-/**
- * 'F': forward
- * 'R': turn Right
- * 'L': turn left
- * 'B'  return
- */
+
 void setup() {
   Serial.begin(9600); // opens serial port, sets data rate to 9600 bps
   pinMode(trigPinFront,OUTPUT);
@@ -370,6 +368,3 @@ bool isDeadend(){
   }
 }
 
-void init_interrupt(){
-  Timer1.initialize();
-}
