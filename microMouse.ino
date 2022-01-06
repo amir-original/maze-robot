@@ -11,7 +11,7 @@ RF24 radio(9, 8); // (CE, CSN) for ARD Nano
 #define MB2 11
 
 #define PWM_RIGHT 200
-#define PWM_LEFT 120
+#define PWM_LEFT 200
 #define DST 11
 
 /**
@@ -23,9 +23,10 @@ int trigPinRight=A1;
 int echoPinRight=A0;
 int trigPinFront=A3;
 int echoPinFront=A2;
+//
 long duration;
 int  distance;
-int role=-1;  
+int cell=-1;  
 bool isFindCorrectPath=false;
 bool deadend=false;
 int send_count=0;
@@ -81,7 +82,7 @@ void loop() {
   //just front open
   if(isLeftWall() && isRightWall() && !isFrontWall()){
     forward();
-    path[++role]=1;
+    path[++cell]=1;
     Serial.println("forward first");
     delay(100);
     Stop();
@@ -89,7 +90,7 @@ void loop() {
 
   //just right open
   if(isLeftWall() && !isRightWall() && isFrontWall()){
-    path[++role]=2;
+    path[++cell]=2;
     turnRight();
     delay(50);
     forward();
@@ -99,7 +100,7 @@ void loop() {
 
   //just left open 
   if(!isLeftWall() && isRightWall() && isFrontWall()){
-    path[++role]=3;
+    path[++cell]=3;
     turnLeft();
     delay(50);
     forward();
@@ -116,8 +117,8 @@ void loop() {
         delay(50);
         forward();
         delay(100);
-        path[++role]=2;
-        curr_dir[role]='R';
+        path[++cell]=2;
+        curr_dir[cell]='R';
         Serial.println("right 1");
       }
       if(rand_==2){
@@ -125,12 +126,12 @@ void loop() {
         delay(50);
         forward();
         delay(100);
-        path[++role]=3;
-        curr_dir[role]='L';
+        path[++cell]=3;
+        curr_dir[cell]='L';
         Serial.println("left..");
       }
-       two_way[role]=1;
-       mode[role]='A';//LR
+       two_way[cell]=1;
+       mode[cell]='A';//LR
        Stop();
        delay(70);
   }
@@ -142,21 +143,21 @@ void loop() {
     if(rand_==1){
         forward();
         delay(100);
-        path[++role]=1;
-        curr_dir[role]='F';
-         Serial.println("forward..");
+        path[++cell]=1;
+        curr_dir[cell]='F';
+        Serial.println("forward..");
       }
       if(rand_==2){
         turnLeft();
         delay(50);
         forward();
         delay(100);
-        path[++role]=3;
-        curr_dir[role]='L';
-         Serial.println("left..");
+        path[++cell]=3;
+        curr_dir[cell]='L';
+        Serial.println("left..");
       }
-      two_way[role]=1;
-      mode[role]='C';//LF
+      two_way[cell]=1;
+      mode[cell]='C';//LF
       Stop();
       delay(70);
   }
@@ -168,8 +169,8 @@ void loop() {
     if(rand_==1){
         forward();
         delay(100);
-        path[++role]=1;
-        curr_dir[role]='F';
+        path[++cell]=1;
+        curr_dir[cell]='F';
         Serial.println("forward..");
       }
       if(rand_==2){
@@ -177,12 +178,12 @@ void loop() {
         delay(50);
         forward();
         delay(100);
-        path[++role]=2;
-        curr_dir[role]='R';
+        path[++cell]=2;
+        curr_dir[cell]='R';
         Serial.println("right 2");
       }
-      two_way[role]=1;
-      mode[role]='B';
+      two_way[cell]=1;
+      mode[cell]='B';//FR
       Stop();
       delay(70);
   }
@@ -206,12 +207,12 @@ void loop() {
 
   //right and left and front open all dir open
   if(isAllDirOpen()){
-    Serial.println("all dir open");
-    Serial.println("forward");
-    forward();
-    delay(4000);
-    Stop();
-    path[++role]=1;
+     Serial.println("all dir open");
+     Serial.println("forward");
+     forward();
+     delay(4000);
+     Stop();
+    path[++cell]=1;
     if(isAllDirOpen()){
       Stop();
       delay(2000);
@@ -239,78 +240,78 @@ void loop() {
 }
 
 void turn_back(){
-  for(;two_way[role]!=1;role--){
-    if(path[role]==1){
+  for(;two_way[cell]!=1;cell--){
+    if(path[cell]==1){
       forward();
       Serial.println("turn back :forward");
       delay(100);
       Stop();
-    }else if(path[role]==2){
+    }else if(path[cell]==2){
       turnLeft();
       delay(50);
       forward();
       delay(100);
       Serial.println("turn back: left");
-    }else if(path[role]==3){
+    }else if(path[cell]==3){
       turnRight();
       delay(50);
       forward();
       delay(100);
       Serial.println("turn back: right");
     }
-    path[role]=0;
+    path[cell]=0;
     delay(5000);
     Stop();
 }
    //two way
-   if(two_way[role]==1){
-      if(mode[role]=='A' && curr_dir[role]=='L'){
+   if(two_way[cell]==1){
+      if(mode[cell]=='A' && curr_dir[cell]=='L'){
       forward();
       Serial.println("two turn back: forward");
       delay(100);
       Stop();
-      path[role]=2;
+      path[cell]=2;
     }
-    if(mode[role]=='A' && curr_dir[role]=='R'){
+    if(mode[cell]=='A' && curr_dir[cell]=='R'){
       forward();
       Serial.println("two turn back: forward");
       delay(100);
       Stop();
-      path[role]=3;
+      path[cell]=3;
     }
     //left and front open
-    if(mode[role]=='C' && curr_dir[role]=='F'){
+    if(mode[cell]=='C' && curr_dir[cell]=='F'){
       turnRight();
       delay(50);
       forward();
       delay(100);
-      path[role]=3;
+      path[cell]=3;
       Serial.println("two turn back : right");
     }
-    if(mode[role]=='C' && curr_dir[role]=='L'){
+    if(mode[cell]=='C' && curr_dir[cell]=='L'){
       turnLeft();
       delay(50);
       forward();
       delay(100);
       Serial.println("turn back: left");
-      path[role]=1;
+      path[cell]=1;
     }
     //right and front open
-    if(mode[role]=='B' && curr_dir[role]=='F'){
+    if(mode[cell]=='B' && curr_dir[cell]=='F'){
       turnLeft();
       delay(50);
       forward();
       delay(100);
       Serial.println("two turn back: left");
-      path[role]=2;
+      path[cell]=2;
     }
-    if(mode[role]=='B' && curr_dir[role]=='R'){
+    if(mode[cell]=='B' && curr_dir[cell]=='R'){
       turnRight();
       delay(50);
       forward();
       delay(100);
       Serial.println("two turn back: right");
-      path[role]=1;
+      path[cell]=1;
     }
    }
    Stop();
