@@ -1,4 +1,3 @@
-
 /*Initilize WIFI Madule*/
 #include <SPI.h>
 #include <nRF24L01.h>
@@ -26,10 +25,10 @@ int trigPinFront=A3;
 int echoPinFront=A2;
 long duration;
 int  distance;
-int incomingByte = 0; // for incoming serial data
 int role=-1;  
 bool isFindCorrectPath=false;
 bool deadend=false;
+int send_count=0;
 uint32_t path[36],two_way[36]={0,0,0,0,0,0,
                                0,0,0,0,0,0,
                                0,0,0,0,0,0,
@@ -76,12 +75,6 @@ void setup() {
   radio.stopListening();
 }
 void loop() {
-  Serial.println("array path: ");
-  for(int i=role;i>0;i--){
-   Serial.print(path[i]);
-   Serial.println(" , ");
-   delay(1000);
-  }
   Stop();
   delay(5000);
 
@@ -90,21 +83,17 @@ void loop() {
     forward();
     path[++role]=1;
     Serial.println("forward first");
-    delay(2000);
+    delay(100);
     Stop();
-    if(leftSensor() > rightSensor()){
-      turnLeft();
-      delay(300);
-    }else{
-      turnRight();
-      delay(100);
-    }
   }
 
   //just right open
   if(isLeftWall() && !isRightWall() && isFrontWall()){
     path[++role]=2;
     turnRight();
+    delay(50);
+    forward();
+    delay(100);
     Serial.println("right");
   }
 
@@ -112,7 +101,10 @@ void loop() {
   if(!isLeftWall() && isRightWall() && isFrontWall()){
     path[++role]=3;
     turnLeft();
-     Serial.println("left");
+    delay(50);
+    forward();
+    delay(100);
+    Serial.println("left");
   }
 
   //left and right open
@@ -121,12 +113,18 @@ void loop() {
     //choose random way between left and right
       if(rand_==1){
         turnRight();
+        delay(50);
+        forward();
+        delay(100);
         path[++role]=2;
         curr_dir[role]='R';
         Serial.println("right 1");
       }
       if(rand_==2){
         turnLeft();
+        delay(50);
+        forward();
+        delay(100);
         path[++role]=3;
         curr_dir[role]='L';
         Serial.println("left..");
@@ -143,12 +141,16 @@ void loop() {
     //choose random way between left and front
     if(rand_==1){
         forward();
+        delay(100);
         path[++role]=1;
         curr_dir[role]='F';
          Serial.println("forward..");
       }
       if(rand_==2){
         turnLeft();
+        delay(50);
+        forward();
+        delay(100);
         path[++role]=3;
         curr_dir[role]='L';
          Serial.println("left..");
@@ -165,12 +167,16 @@ void loop() {
     //choose random way between right and front
     if(rand_==1){
         forward();
+        delay(100);
         path[++role]=1;
         curr_dir[role]='F';
         Serial.println("forward..");
       }
       if(rand_==2){
         turnRight();
+        delay(50);
+        forward();
+        delay(100);
         path[++role]=2;
         curr_dir[role]='R';
         Serial.println("right 2");
@@ -220,7 +226,14 @@ void loop() {
  * after solve maze and find correct path send correct path to Fellow robot 
  */
   if(isFindCorrectPath){
-    send_correct_path_to_fellow_robot();
+    if(send_count==0){
+      int result=send_correct_path_to_fellow_robot();
+      if(result){
+        send_count=1;
+      }
+    }else{
+       Serial.println("Already Sended.");
+    }
   }
 
 }
@@ -230,13 +243,19 @@ void turn_back(){
     if(path[role]==1){
       forward();
       Serial.println("turn back :forward");
-      delay(2000);
+      delay(100);
       Stop();
     }else if(path[role]==2){
       turnLeft();
+      delay(50);
+      forward();
+      delay(100);
       Serial.println("turn back: left");
     }else if(path[role]==3){
       turnRight();
+      delay(50);
+      forward();
+      delay(100);
       Serial.println("turn back: right");
     }
     path[role]=0;
@@ -248,36 +267,48 @@ void turn_back(){
       if(mode[role]=='A' && curr_dir[role]=='L'){
       forward();
       Serial.println("two turn back: forward");
-      delay(1000);
+      delay(100);
       Stop();
       path[role]=2;
     }
     if(mode[role]=='A' && curr_dir[role]=='R'){
       forward();
       Serial.println("two turn back: forward");
-      delay(1000);
+      delay(100);
       Stop();
       path[role]=3;
     }
     //left and front open
     if(mode[role]=='C' && curr_dir[role]=='F'){
       turnRight();
+      delay(50);
+      forward();
+      delay(100);
       path[role]=3;
       Serial.println("two turn back : right");
     }
     if(mode[role]=='C' && curr_dir[role]=='L'){
       turnLeft();
+      delay(50);
+      forward();
+      delay(100);
       Serial.println("turn back: left");
       path[role]=1;
     }
     //right and front open
     if(mode[role]=='B' && curr_dir[role]=='F'){
       turnLeft();
+      delay(50);
+      forward();
+      delay(100);
       Serial.println("two turn back: left");
       path[role]=2;
     }
     if(mode[role]=='B' && curr_dir[role]=='R'){
       turnRight();
+      delay(50);
+      forward();
+      delay(100);
       Serial.println("two turn back: right");
       path[role]=1;
     }
@@ -372,16 +403,6 @@ bool isFrontWall(){
   return false;
 }
 
-bool isWall(){
-  if(isFrontWall)
-    return true;
-  else if(isRightWall())
-    return true;
-  else if (isLeftWall())
-    return true;
-  else
-    return false;      
-}
 
 bool isAllDirOpen(){
   if(!isLeftWall() && !isRightWall() && !isFrontWall())
