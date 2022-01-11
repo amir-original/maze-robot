@@ -2,6 +2,7 @@
  *  Cooperation of Multiple Robots to Solve Maze Tasks
  *  The circuit:
  *    1.Arduino Uno
+ *    3.Dc Motor 100RPM
  *    2.L9110S
  *    3.Ultrasonic
  *    4.Nrf24l01
