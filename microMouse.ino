@@ -1,3 +1,15 @@
+/**
+ *  Cooperation of Multiple Robots to Solve Maze Tasks
+ *  The circuit:
+ *    1.Arduino Uno
+ *    2.L9110S
+ *    3.Ultrasonic
+ *    4.Nrf24l01
+ *  Created At 20/12/2021
+ *  By Amirhossein Rahmani & Mohsen Rahimi
+ */
+
+ 
 /*Initilize WIFI Madule*/
 #include <SPI.h>
 #include <nRF24L01.h>
@@ -145,7 +157,7 @@ void loop() {
         delay(100);
         path[++cell]=1;
         curr_dir[cell]='F';
-        Serial.println("forward..");
+         Serial.println("forward..");
       }
       if(rand_==2){
         turnLeft();
@@ -154,7 +166,7 @@ void loop() {
         delay(100);
         path[++cell]=3;
         curr_dir[cell]='L';
-        Serial.println("left..");
+         Serial.println("left..");
       }
       two_way[cell]=1;
       mode[cell]='C';//LF
@@ -207,11 +219,11 @@ void loop() {
 
   //right and left and front open all dir open
   if(isAllDirOpen()){
-     Serial.println("all dir open");
-     Serial.println("forward");
-     forward();
-     delay(4000);
-     Stop();
+    Serial.println("all dir open");
+    Serial.println("forward");
+    forward();
+    delay(4000);
+    Stop();
     path[++cell]=1;
     if(isAllDirOpen()){
       Stop();

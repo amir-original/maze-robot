@@ -1,3 +1,13 @@
+/**
+ *  Cooperation of Multiple Robots to Solve Maze Tasks
+ *  The circuit:
+ *    1.Arduino Uno
+ *    2.L9110S
+ *    3.Ultrasonic
+ *    4.Nrf24l01
+ *  Created At 20/12/2021
+ *  By Amirhossein Rahmani & Mohsen Rahimi
+ */
 
 /*Initilize WIFI Madule*/
 #include <SPI.h>
