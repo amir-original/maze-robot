@@ -4,7 +4,7 @@
  *    1.Arduino Uno
  *    3.Dc Motor 100RPM
  *    2.L9110S
- *    3.Ultrasonic
+ *    3.Ultrasonic HC-SR04
  *    4.Nrf24l01
  *  Created At 20/12/2021
  *  By Amirhossein Rahmani & Mohsen Rahimi
