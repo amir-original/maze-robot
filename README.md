@@ -1,5 +1,7 @@
 # Cooperation of Multiple Robots to Solve Maze Tasks
 **Authors** : *Amirhossein Rahmani & Mohsen Rahimi*
+**Supervisor:** Dr Nassor Bagheri
+**created At** 20/12/2021
 # The circuit:
 1. Arduino Uno
 2. Dc Motor 100RPM
