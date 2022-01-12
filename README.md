@@ -7,7 +7,7 @@
 5. Nrf24l01
 ---
 **Authors:** Amirhossein Rahmani & Mohsen Rahimi<br>
-**Supervisor:** Dr Nassor Bagheri<br>
+**Supervisor:** Dr Nasuor Bagheri<br>
 **created At** 20/12/2021<br>
 > A thesis submitted to the Graduate Studies Office in partial fulfillment of  
 > the requierments for the degree of Masters in the Electronic Engineering 
