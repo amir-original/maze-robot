@@ -1,4 +1,6 @@
+
 /**
+ *  Fellow Robot
  *  Cooperation of Multiple Robots to Solve Maze Tasks
  *  The circuit:
  *    1.Arduino Uno
@@ -28,6 +30,7 @@ const byte address[6] = {'R','x','A','A','A'};
 
 uint32_t path[36];
 bool start_=false;
+bool is_read_data=false;
 /**
  * path=1 --> move forward
  * path=2 --> turn right
@@ -47,35 +50,41 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  while(isDataAvailable()){
-    get_data();
-    if(isValidData()){
-       start_=true;
+  if(!is_read_data){
+    while(isDataAvailable()){
+      get_data();
+      if(isValidData()){
+        start_=true;
+        is_read_data=true;
+      }
     }
-  }
-
+ }
+  
   if(start_){
     for(int i=0;i<36;i++){
       if(path[i]==1){
         forward();
-        delay(2000);
+        delay(100);
         Stop();
       }
 
       if(path[i]==2){
         turnRight();
-        delay(180);
+        delay(50);
+        forward();
+        delay(100);
         Stop();
       }
 
       if(path[i]==3){
         turnLeft();
-        delay(180);
+        delay(50);
+        forward();
+        delay(100);
         Stop();
       }
 
-      delay(3000);
+      delay(4000);
       Stop();
     }
     start_=false;
