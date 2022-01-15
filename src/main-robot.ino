@@ -43,6 +43,7 @@ int cell=-1;
 bool isFindCorrectPath=false;
 bool deadend=false;
 int send_count=0;
+int data;
 uint32_t path[36],two_way[36]={0,0,0,0,0,0,
                                0,0,0,0,0,0,
                                0,0,0,0,0,0,
@@ -84,6 +85,9 @@ void setup() {
 
   //setup wifi
   radio.begin();
+  radio.setAutoAck(1);                
+  radio.enableAckPayload();         
+  radio.setRetries(5,15);
   radio.openWritingPipe(address);
   radio.setPALevel(RF24_PA_MAX);
   radio.stopListening();
@@ -91,7 +95,6 @@ void setup() {
 void loop() {
   Stop();
   delay(5000);
-
   //just front open
   if(isLeftWall() && isRightWall() && !isFrontWall()){
     forward();
@@ -102,7 +105,7 @@ void loop() {
   }
 
   //just right open
-  if(isLeftWall() && !isRightWall() && isFrontWall()){
+  else if(isLeftWall() && !isRightWall() && isFrontWall()){
     path[++cell]=2;
     turnRight();
     delay(50);
@@ -112,7 +115,7 @@ void loop() {
   }
 
   //just left open 
-  if(!isLeftWall() && isRightWall() && isFrontWall()){
+ else if(!isLeftWall() && isRightWall() && isFrontWall()){
     path[++cell]=3;
     turnLeft();
     delay(50);
@@ -122,25 +125,25 @@ void loop() {
   }
 
   //left and right open
-  if(!isLeftWall() && !isRightWall() && isFrontWall()){
+  else if(!isLeftWall() && !isRightWall() && isFrontWall()){
     int rand_=random(1,3);
     //choose random way between left and right
       if(rand_==1){
+        path[++cell]=2;
+        curr_dir[cell]='R';
         turnRight();
         delay(50);
         forward();
         delay(100);
-        path[++cell]=2;
-        curr_dir[cell]='R';
         Serial.println("right 1");
       }
       if(rand_==2){
+        path[++cell]=3;
+        curr_dir[cell]='L';
         turnLeft();
         delay(50);
         forward();
         delay(100);
-        path[++cell]=3;
-        curr_dir[cell]='L';
         Serial.println("left..");
       }
        two_way[cell]=1;
@@ -150,24 +153,24 @@ void loop() {
   }
 
   //left and front open
-  if(!isLeftWall() && isRightWall() && !isFrontWall()){
+  else if(!isLeftWall() && isRightWall() && !isFrontWall()){
    int rand_=random(1,3);
     //choose random way between left and front
     if(rand_==1){
-        forward();
-        delay(100);
         path[++cell]=1;
         curr_dir[cell]='F';
-         Serial.println("forward..");
+        forward();
+        delay(100);
+        Serial.println("forward..");
       }
       if(rand_==2){
+        path[++cell]=3;
+        curr_dir[cell]='L';
         turnLeft();
         delay(50);
         forward();
         delay(100);
-        path[++cell]=3;
-        curr_dir[cell]='L';
-         Serial.println("left..");
+        Serial.println("left..");
       }
       two_way[cell]=1;
       mode[cell]='C';//LF
@@ -176,23 +179,23 @@ void loop() {
   }
 
   //right and front open
-  if(isLeftWall() && !isRightWall() && !isFrontWall()){
+ else if(isLeftWall() && !isRightWall() && !isFrontWall()){
    int rand_=random(1,3);
     //choose random way between right and front
     if(rand_==1){
-        forward();
-        delay(100);
         path[++cell]=1;
         curr_dir[cell]='F';
+        forward();
+        delay(100);
         Serial.println("forward..");
       }
       if(rand_==2){
+        path[++cell]=2;
+        curr_dir[cell]='R';
         turnRight();
         delay(50);
         forward();
         delay(100);
-        path[++cell]=2;
-        curr_dir[cell]='R';
         Serial.println("right 2");
       }
       two_way[cell]=1;
@@ -202,7 +205,7 @@ void loop() {
   }
 
   //Deadend left and right and front wall
-  if(isDeadend()){
+  else if(isDeadend()){
     Serial.println("Deadend");
     turnRight();
     //turn back 180deg
@@ -213,13 +216,13 @@ void loop() {
   }
 
   //turn back if is deadend
-  if(deadend){
+ if(deadend){
     turn_back();
     delay(1000);
   }
 
   //right and left and front open all dir open
-  if(isAllDirOpen()){
+ if(isAllDirOpen()){
     Serial.println("all dir open");
     Serial.println("forward");
     forward();
@@ -239,17 +242,16 @@ void loop() {
 /**
  * after solve maze and find correct path send correct path to Fellow robot 
  */
-  if(isFindCorrectPath){
+ while(isFindCorrectPath){
+    Stop();
+    Serial.println("Stop Motor");
     if(send_count==0){
-      int result=send_correct_path_to_fellow_robot();
-      if(result){
-        send_count=1;
-      }
+     send_correct_path_to_fellow_robot();
     }else{
        Serial.println("Already Sended.");
     }
+    delay(400);
   }
-
 }
 
 void turn_back(){
@@ -393,7 +395,7 @@ int leftSensor(){
 }
 int frontSensor(){
   long duration=getDuration(trigPinFront,echoPinFront);
-  return (duration/40);
+  return (duration*0.034/2);
 }
 bool isLeftWall(){
   if(leftSensor()<DST){
@@ -433,16 +435,16 @@ bool isDeadend(){
   }
 }
 
-bool send_correct_path_to_fellow_robot(){
+void send_correct_path_to_fellow_robot(){
   Serial.println("Sending...");
-  int result=radio.write(&correct_path, sizeof(correct_path));
-  if(!result){
-   Serial.println("oops!, send failed!!");
-   return false;
-  }
+  for (int j = 0; j < 32; j++) {
+      data=correct_path[j];
+      radio.write(&data, sizeof(data));   
+      Serial.println(data);    
+      delay(1000);
+   }
    Serial.println("sended successed");
-   return true;
-  delay(200);
+   send_count=1;
 }
 
 // Function to copy 'len' elements from 'src' to 'dst'
