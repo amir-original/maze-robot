@@ -28,9 +28,13 @@ const byte address[6] = {'R','x','A','A','A'};
 #define PWM_RIGHT 200
 #define PWM_LEFT 120
 
-uint32_t path[36];
 bool start_=false;
 bool is_read_data=false;
+int j=-1;
+int path[32];
+int data;
+int count=0;
+
 /**
  * path=1 --> move forward
  * path=2 --> turn right
@@ -44,6 +48,9 @@ void setup() {
   pinMode(MB2, OUTPUT);
  
   radio.begin();
+  radio.setAutoAck(1);                
+  radio.enableAckPayload();         
+  radio.setRetries(5,15);
   radio.openReadingPipe(1,address); // for Ard. NANO
   radio.setPALevel(RF24_PA_MAX);
   radio.startListening();
@@ -52,11 +59,17 @@ void setup() {
 void loop() {
   if(!is_read_data){
     while(isDataAvailable()){
-      get_data();
-      if(isValidData()){
-        start_=true;
+      read_data();
+      if(count>32){
         is_read_data=true;
+        if(isValidData()){
+          start_=true;
+          Serial.println("Data read and is valid.");
+        }else{
+          Serial.println("Data read and is not valid check your connection.");
+        }
       }
+      count++;
     }
  }
   
@@ -136,20 +149,26 @@ bool isDataAvailable(){
   return false;
 }
 
-void get_data(){
-  radio.read(path, sizeof(path));
-  // check 
+
+void read_data(){
+  if (j<32){
+    radio.read(&data, sizeof(data));
+    path[++j]=data;
+    Serial.println(path[j]);
+    delay(1000);
+    }
 }
 
 bool isValidData(){
   int count=0;
-  for(int i=0;i<36;i++){
+  for(int i=0;i<32;i++){
     if(path[i] > 0 && (path[i]==1 || path[i]==2 || path[i]==3)){
       return true;
     }
-  if(path[i]==0){
-    count++;
-  }
+    if(path[i]==0){
+       count++;
+    }
+    delay(500);
  }
  if(count>30){
   return false;
