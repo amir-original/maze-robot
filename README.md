@@ -1,8 +1,9 @@
 # Cooperation of Multiple Robots to Solve Maze Tasks
+> B.Sc. Thesis
 **Authors:** Amirhossein Rahmani & Mohsen Rahimi<br>
 **Supervisor:** Dr Nasuor Bagheri<br>
 **created At** 20/12/2021<br>
----
+
 ## Abstract:
 
 
@@ -15,6 +16,5 @@ The rapid development of technologies leads us to careful planning for the best 
 4. Ultrasonic HC-SR04
 5. Nrf24l01
 
-> B.Sc. Thesis
 
 
