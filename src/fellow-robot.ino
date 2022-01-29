@@ -161,16 +161,20 @@ void read_data(){
 
 bool isValidData(){
   int count=0;
+  int correct_count=0;
   for(int i=0;i<32;i++){
     if(path[i] > 0 && (path[i]==1 || path[i]==2 || path[i]==3)){
-      continue;
+      correct_count++;
     }
     if(path[i]==0){
       count++;
     }
     delay(200);
  }
+
  if(count>30){
+  return false;
+ }else if(correct_count<15){
   return false;
  }
  return true;
