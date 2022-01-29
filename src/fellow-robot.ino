@@ -66,7 +66,7 @@ void loop() {
           start_=true;
           Serial.println("Data read and is valid.");
         }else{
-          Serial.println("Data read and is not valid check your connection.");
+          Serial.println("Data read But is not valid check your connection.");
         }
       }
       count++;
@@ -163,14 +163,15 @@ bool isValidData(){
   int count=0;
   for(int i=0;i<32;i++){
     if(path[i] > 0 && (path[i]==1 || path[i]==2 || path[i]==3)){
-      return true;
+      continue;
     }
     if(path[i]==0){
-       count++;
+      count++;
     }
-    delay(500);
+    delay(200);
  }
  if(count>30){
   return false;
  }
+ return true;
 }
