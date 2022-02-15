@@ -20,10 +20,10 @@
 
 RF24 radio(9, 8); // (CE, CSN) for ARD Nano
 const byte address[6] = {'R','x','A','A','A'};
-#define MA1 5  // Motor A pins
-#define MA2 6
-#define MB1 10 // Motor B pins
-#define MB2 11
+#define MA1 3  // Motor A pins
+#define MA2 5
+#define MB1 6 // Motor B pins
+#define MB2 10
 
 #define PWM_RIGHT 200
 #define PWM_LEFT 120
@@ -32,6 +32,7 @@ bool start_=false;
 bool is_read_data=false;
 int j=-1;
 int path[32];
+int cell=0;
 int data;
 int count=0;
 
@@ -57,55 +58,79 @@ void setup() {
 }
 
 void loop() {
-  if(!is_read_data){
+   if(!is_read_data){
     while(isDataAvailable()){
       read_data();
       if(count>32){
+        start_=true;
         is_read_data=true;
-        if(isValidData()){
-          start_=true;
-          Serial.println("Data read and is valid.");
-        }else{
-          Serial.println("Data read But is not valid check your connection.");
-        }
       }
       count++;
     }
  }
   
-  if(start_){
-    for(int i=0;i<36;i++){
-      if(path[i]==1){
+  while(start_){
+      if(path[cell]==1){
         forward();
-        delay(100);
+        delay(400);
         Stop();
       }
 
-      if(path[i]==2){
+      if(path[cell]==2){
         turnRight();
-        delay(50);
-        forward();
-        delay(100);
+        delay(470);
         Stop();
+        delay(5000);    
+        forward();    
+        delay(400);
       }
 
-      if(path[i]==3){
+      if(path[cell]==3){
         turnLeft();
-        delay(50);
-        forward();
-        delay(100);
+        delay(470);
         Stop();
+        delay(5000);    
+        forward();
+        delay(400);
       }
 
       delay(4000);
       Stop();
     }
-    start_=false;
+    if(cell==32){
+      start_=false;
+    }
+    cell++;
     //end maze
-  }
 }
 
+/**
+ * Adjust speed and distance from obstacles
+ */
+void control_speed(int speed_left,int speed_right){
+  analogWrite(MA1, speed_left);
+  analogWrite(MA2, 0);
+  analogWrite(MB1, speed_right);
+  analogWrite(MB2, 0);
+}
+
+void distance_adjustment(int left_dst,int right_dst){
+if(leftSensor() < left_dst){             
+    control_speed(50,200);
+	  delay(95);
+    Stop();
+    delay(1000);      
+  }   
+
+  if(rightSensor() < right_dst){
+    control_speed(200,50);
+    delay(95);
+    Stop();
+    delay(1000);       
+  }
+}
 void  forward() {          //function of forward 
+  distance_adjustment(DST_OBSTACLE,DST_OBSTACLE)
   analogWrite(MA1, LOW);
   analogWrite(MA2, PWM_LEFT);
   analogWrite(MB1, LOW);
@@ -158,7 +183,9 @@ void read_data(){
     delay(1000);
     }
 }
-
+/**
+ * wifi test
+ * 
 bool isValidData(){
   int count=0;
   int correct_count=0;
@@ -178,4 +205,4 @@ bool isValidData(){
   return false;
  }
  return true;
-}
+}**/
