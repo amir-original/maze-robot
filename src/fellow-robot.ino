@@ -8,7 +8,7 @@
  *    3.L9110S
  *    4.Ultrasonic HC-SR04
  *    5.Nrf24l01
- *  Created At 20/12/2021
+ *  Created At 20/12/2021 - Updated At 15/2/2022
  *  By Amirhossein Rahmani & Mohsen Rahimi
  */
 
@@ -102,6 +102,7 @@ void loop() {
     }
     cell++;
     //end maze
+  }
 }
 
 /**
