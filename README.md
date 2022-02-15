@@ -1,9 +1,10 @@
 # Cooperation of Multiple Robots to Solve Maze Tasks
 > B.Sc Thesis
 > 
-> **Supervisor:** Dr Nasuor Bagheri<br>
+> **Supervisor:** Dr.Nasour Bagheri<br>
 > **Authors:** Amirhossein Rahmani & Mohsen Rahimi<br>
 > **created At** 20/12/2021<br>
+> **Updated At** 15/2/2022<br>
 
 ## Abstract:
 
