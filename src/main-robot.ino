@@ -391,7 +391,7 @@ if(leftSensor() < left_dst){
   }
 }
 void  forward() {          //function of forward 
-  distance_adjustment(DST_OBSTACLE,DST_OBSTACLE)
+  distance_adjustment(DST_OBSTACLE,DST_OBSTACLE);
   analogWrite(MA1, LOW);
   analogWrite(MA2, PWM_LEFT);
   analogWrite(MB1, LOW);

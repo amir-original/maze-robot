@@ -26,7 +26,22 @@ const byte address[6] = {'R','x','A','A','A'};
 #define MB2 10
 
 #define PWM_RIGHT 200
-#define PWM_LEFT 120
+#define PWM_LEFT 200
+#define DST 20
+#define DST_OBSTACLE 9
+
+/**
+*initialize all ultrasonics
+*/
+int trigPinLeft=A5;
+int echoPinLeft=A4;
+int trigPinRight=A1;
+int echoPinRight=A0;
+int trigPinFront=A3;
+int echoPinFront=A2;
+//
+long duration;
+int  distance;
 
 bool start_=false;
 bool is_read_data=false;
@@ -96,7 +111,6 @@ void loop() {
 
       delay(4000);
       Stop();
-    }
     if(cell==32){
       start_=false;
     }
@@ -131,7 +145,7 @@ if(leftSensor() < left_dst){
   }
 }
 void  forward() {          //function of forward 
-  distance_adjustment(DST_OBSTACLE,DST_OBSTACLE)
+  distance_adjustment(DST_OBSTACLE,DST_OBSTACLE);
   analogWrite(MA1, LOW);
   analogWrite(MA2, PWM_LEFT);
   analogWrite(MB1, LOW);
@@ -164,6 +178,33 @@ void turnRight() {         //function of turn right
   analogWrite(MA2, PWM_LEFT);
   analogWrite(MB1, PWM_RIGHT);
   analogWrite(MB2, LOW);
+}
+
+/**
+ * get distance(cm) by ultarsonic sensor
+ */
+int getDuration(int trigPin,int echoPin){
+  digitalWrite(trigPin,LOW);
+  delayMicroseconds(5);
+  digitalWrite(echoPin,LOW);
+  digitalWrite(trigPin,HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin,LOW);
+  duration=pulseIn(echoPin,HIGH);
+  return duration;
+}
+
+int rightSensor(){
+  long duration=getDuration(trigPinRight,echoPinRight);
+  return (duration*0.034/2);
+}
+int leftSensor(){
+  long duration=getDuration(trigPinLeft,echoPinLeft);
+  return (duration*0.034/2);
+}
+int frontSensor(){
+  long duration=getDuration(trigPinFront,echoPinFront);
+  return (duration*0.034/2);
 }
 
 bool isDataAvailable(){
