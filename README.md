@@ -13,7 +13,7 @@ The rapid development of technologies leads us to careful planning for the best 
 
 # The circuit:
 1. Arduino Uno
-2. Dc Motor 100RPM
+2. Dc Motor 220RPM
 3. L9110S
 4. Ultrasonic HC-SR04
 5. Nrf24l01
