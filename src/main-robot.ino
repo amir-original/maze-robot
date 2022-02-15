@@ -18,14 +18,15 @@
 #include <printf.h>
 
 RF24 radio(9, 8); // (CE, CSN) for ARD Nano
-#define MA1 5  // Motor A pins
-#define MA2 6
-#define MB1 10 // Motor B pins
-#define MB2 11
+#define MA1 3  // Motor A pins
+#define MA2 5
+#define MB1 6 // Motor B pins
+#define MB2 10
 
-#define PWM_RIGHT 200
-#define PWM_LEFT 200
-#define DST 11
+#define PWM_RIGHT 175
+#define PWM_LEFT 235
+#define DST 20
+#define DST_OBSTACLE 9
 
 /**
 *initialize all ultrasonics
@@ -43,7 +44,6 @@ int cell=-1;
 bool isFindCorrectPath=false;
 bool deadend=false;
 int send_count=0;
-int data;
 uint32_t path[36],two_way[36]={0,0,0,0,0,0,
                                0,0,0,0,0,0,
                                0,0,0,0,0,0,
@@ -97,10 +97,10 @@ void loop() {
   delay(5000);
   //just front open
   if(isLeftWall() && isRightWall() && !isFrontWall()){
-    forward();
+    //Serial.println("forward first");
     path[++cell]=1;
-    Serial.println("forward first");
-    delay(100);
+    forward();
+    delay(450);
     Stop();
   }
 
@@ -108,20 +108,24 @@ void loop() {
   else if(isLeftWall() && !isRightWall() && isFrontWall()){
     path[++cell]=2;
     turnRight();
-    delay(50);
-    forward();
-    delay(100);
-    Serial.println("right");
+    delay(470);
+    Stop();
+    delay(5000);    
+    forward();    
+    delay(450);
+    //Serial.println("right");
   }
 
   //just left open 
  else if(!isLeftWall() && isRightWall() && isFrontWall()){
     path[++cell]=3;
     turnLeft();
-    delay(50);
+    delay(470);
+    Stop();
+    delay(5000);    
     forward();
-    delay(100);
-    Serial.println("left");
+    delay(450);
+    //Serial.println("left");
   }
 
   //left and right open
@@ -131,20 +135,24 @@ void loop() {
       if(rand_==1){
         path[++cell]=2;
         curr_dir[cell]='R';
+        //Serial.println("right 1");
         turnRight();
-        delay(50);
+        delay(470);
+        Stop();
+        delay(5000);
         forward();
-        delay(100);
-        Serial.println("right 1");
+        delay(450); 
       }
       if(rand_==2){
         path[++cell]=3;
         curr_dir[cell]='L';
+        //Serial.println("left..");
         turnLeft();
-        delay(50);
+        delay(470);
+        Stop();
+        delay(5000);        
         forward();
-        delay(100);
-        Serial.println("left..");
+        delay(450);  
       }
        two_way[cell]=1;
        mode[cell]='A';//LR
@@ -160,17 +168,19 @@ void loop() {
         path[++cell]=1;
         curr_dir[cell]='F';
         forward();
-        delay(100);
-        Serial.println("forward..");
+        delay(450);
+       // Serial.println("forward..");
       }
       if(rand_==2){
         path[++cell]=3;
         curr_dir[cell]='L';
+        //Serial.println("left..");
         turnLeft();
-        delay(50);
+        delay(470);
+        Stop();
+        delay(5000);        
         forward();
-        delay(100);
-        Serial.println("left..");
+        delay(450);
       }
       two_way[cell]=1;
       mode[cell]='C';//LF
@@ -186,17 +196,19 @@ void loop() {
         path[++cell]=1;
         curr_dir[cell]='F';
         forward();
-        delay(100);
-        Serial.println("forward..");
+        delay(450);
+        //Serial.println("forward..");
       }
       if(rand_==2){
         path[++cell]=2;
         curr_dir[cell]='R';
+        //Serial.println("right 2");
         turnRight();
-        delay(50);
+        delay(470);
+        Stop();
+        delay(5000);        
         forward();
-        delay(100);
-        Serial.println("right 2");
+        delay(450);
       }
       two_way[cell]=1;
       mode[cell]='B';//FR
@@ -206,12 +218,15 @@ void loop() {
 
   //Deadend left and right and front wall
   else if(isDeadend()){
-    Serial.println("Deadend");
+    //Serial.println("Deadend");
+     //turn back 180deg
     turnRight();
-    //turn back 180deg
     delay(2000);
-    Serial.println("turn back 180deg");
     Stop();
+    delay(5000);
+    forward();
+    delay(450);   
+    //Serial.println("turn back 180deg");
     deadend=true;
   }
 
@@ -223,16 +238,16 @@ void loop() {
 
   //right and left and front open all dir open
  if(isAllDirOpen()){
-    Serial.println("all dir open");
-    Serial.println("forward");
+    //Serial.println("all dir open");
+    //Serial.println("forward");
     forward();
-    delay(4000);
+    delay(1000);
     Stop();
     path[++cell]=1;
     if(isAllDirOpen()){
       Stop();
       delay(2000);
-      Serial.println("End maze..");
+      //Serial.println("End maze..");
       isFindCorrectPath=true;
       //End maze and send path to another robot
       copy(path,correct_path,36);
@@ -256,23 +271,29 @@ void loop() {
 
 void turn_back(){
   for(;two_way[cell]!=1;cell--){
+    Stop();
+    delay(5000);
     if(path[cell]==1){
       forward();
-      Serial.println("turn back :forward");
-      delay(100);
+      delay(450);
       Stop();
+      //Serial.println("turn back :forward");
     }else if(path[cell]==2){
       turnLeft();
-      delay(50);
+      delay(470);
+      Stop();
+      delay(5000);    
       forward();
-      delay(100);
-      Serial.println("turn back: left");
+      delay(450);  
+      //Serial.println("turn back: left");
     }else if(path[cell]==3){
       turnRight();
-      delay(50);
+      delay(470);  
+      Stop();
+      delay(5000);
       forward();
-      delay(100);
-      Serial.println("turn back: right");
+      delay(450);      
+      //Serial.println("turn back: right");
     }
     path[cell]=0;
     delay(5000);
@@ -282,61 +303,94 @@ void turn_back(){
    if(two_way[cell]==1){
       if(mode[cell]=='A' && curr_dir[cell]=='L'){
       forward();
-      Serial.println("two turn back: forward");
-      delay(100);
+      delay(450);
       Stop();
       path[cell]=2;
+      //Serial.println("two turn back: forward");
     }
     if(mode[cell]=='A' && curr_dir[cell]=='R'){
       forward();
-      Serial.println("two turn back: forward");
-      delay(100);
+      delay(450);
       Stop();
       path[cell]=3;
+      //Serial.println("two turn back: forward");
     }
     //left and front open
     if(mode[cell]=='C' && curr_dir[cell]=='F'){
       turnRight();
-      delay(50);
+      delay(470);   
+      Stop();
+      delay(5000);
       forward();
-      delay(100);
+      delay(450); 
       path[cell]=3;
-      Serial.println("two turn back : right");
+      //Serial.println("two turn back : right");
     }
     if(mode[cell]=='C' && curr_dir[cell]=='L'){
       turnLeft();
-      delay(50);
+      delay(470);    
+      Stop();
+      delay(5000);
       forward();
-      delay(100);
-      Serial.println("turn back: left");
+      delay(450);      
       path[cell]=1;
+      //Serial.println("turn back: left");
     }
     //right and front open
     if(mode[cell]=='B' && curr_dir[cell]=='F'){
       turnLeft();
-      delay(50);
+      delay(470);    
+      Stop();
+      delay(5000); 
       forward();
-      delay(100);
-      Serial.println("two turn back: left");
+      delay(450);
       path[cell]=2;
+      //Serial.println("two turn back: left");
     }
     if(mode[cell]=='B' && curr_dir[cell]=='R'){
       turnRight();
-      delay(50);
+      delay(470);    
+      Stop();
+      delay(5000);
       forward();
-      delay(100);
-      Serial.println("two turn back: right");
+      delay(450);  
       path[cell]=1;
+      //Serial.println("two turn back: right");
     }
    }
    Stop();
-   delay(180);
+   delay(300);
    deadend=false;
    exit;
 }
 
+/**
+ * Adjust speed and distance from obstacles
+ */
+void control_speed(int speed_left,int speed_right){
+  analogWrite(MA1, speed_left);
+  analogWrite(MA2, 0);
+  analogWrite(MB1, speed_right);
+  analogWrite(MB2, 0);
+}
 
+void distance_adjustment(int left_dst,int right_dst){
+if(leftSensor() < left_dst){             
+    control_speed(50,200);
+	  delay(95);
+    Stop();
+    delay(1000);      
+  }   
+
+  if(rightSensor() < right_dst){
+    control_speed(200,50);
+    delay(95);
+    Stop();
+    delay(1000);       
+  }
+}
 void  forward() {          //function of forward 
+  distance_adjustment(DST_OBSTACLE,DST_OBSTACLE)
   analogWrite(MA1, LOW);
   analogWrite(MA2, PWM_LEFT);
   analogWrite(MB1, LOW);
@@ -358,16 +412,16 @@ void Stop() {              //function of stop
 }
 
 void turnLeft() {         //function of turn left
-  analogWrite(MA1, PWM_LEFT);
+  analogWrite(MA1, 195);
   analogWrite(MA2, LOW);
   analogWrite(MB1, LOW);
-  analogWrite(MB2, PWM_RIGHT);
+  analogWrite(MB2, 215);
 }
 
 void turnRight() {         //function of turn right
   analogWrite(MA1, LOW);
-  analogWrite(MA2, PWM_LEFT);
-  analogWrite(MB1, PWM_RIGHT);
+  analogWrite(MA2, 195);
+  analogWrite(MB1, 215);
   analogWrite(MB2, LOW);
 }
 
@@ -436,6 +490,7 @@ bool isDeadend(){
 }
 
 void send_correct_path_to_fellow_robot(){
+  int data;
   Serial.println("Sending...");
   for (int j = 0; j < 32; j++) {
       data=correct_path[j];
